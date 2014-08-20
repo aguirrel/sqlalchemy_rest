@@ -1,3 +1,4 @@
+from datetime import date, time, datetime
 
 def from_dict(self, values):
     """Merge in items in the values dict into our object if it's one of our columns
