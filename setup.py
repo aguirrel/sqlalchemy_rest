@@ -16,7 +16,7 @@ class PyTest(TestCommand):
         result = pytest.main(self.test_args)
         sys.exit(result)
 
-name = 'sqlalchemy-rest'
+name = 'sqlalchemy_rest'
 
 requires = [
     'setuptools'
