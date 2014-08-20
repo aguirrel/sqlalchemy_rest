@@ -1,6 +1,7 @@
 from .. import Base
 from .. import DBSession
 import re
+from sqlalchemy import and_, String
 
 class AlchemyBaseRest(object):
     DBClass = None
