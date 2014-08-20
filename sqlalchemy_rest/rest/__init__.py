@@ -108,7 +108,8 @@ class AlchemyBaseRestTable(AlchemyBaseRest):
 
             if len(fs) > 1:
                 attr_var = self.DBClass.__dict__[fs[0]]
-                attr_class = {k.upper(): v for k, v in globals().items()}[fs[0].upper()]
+                s = find_subclasses(Base)
+                attr_class = {('%s' % c).split('\'')[1].split('.')[-1].upper(): c for c in s}[fs[0].upper()]
                 sub_attr_var = attr_class.__dict__[fs[1]]
                 order.append(getattr(sub_attr_var, self.order_by['value'])())
             else:
