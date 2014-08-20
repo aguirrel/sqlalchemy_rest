@@ -123,7 +123,8 @@ class AlchemyBaseRestTable(AlchemyBaseRest):
         if 'field' in self.order_by:
             fs = self.order_by['field'].split('.')
             if len(fs) > 1:
-                cl.append({k.upper(): v for k, v in globals().items()}[fs[0].upper()])
+                s = find_subclasses(Base)
+                cl.append({('%s' % c).split('\'')[1].split('.')[-1].upper(): c for c in s}[fs[0].upper()])
         return cl
 
 
