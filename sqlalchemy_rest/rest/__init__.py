@@ -1,5 +1,6 @@
 from .. import Base
 from .. import DBSession
+import re
 
 class AlchemyBaseRest(object):
     DBClass = None
