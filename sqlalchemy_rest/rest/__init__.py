@@ -50,19 +50,19 @@ class AlchemyBaseRest(object):
         DBSession.add(o)
         # para obtener el id
         DBSession.flush()
-        return {self.DBClass.__tablename__: o.to_dict()}
+        return o.to_dict()
 
     def delete(self):
         """Removes the user."""
         o = DBSession.query(self.DBClass).filter_by(id=self.request.matchdict['id']).first()
         DBSession.delete(o)
-        return {self.DBClass.__tablename__: o.to_dict()}
+        return o.to_dict()
 
     def put(self):
         o = DBSession.query(self.DBClass).filter_by(id=self.request.matchdict['id']).first()
         for key in self.request.json:
             setattr(o, key, self.request.json[key])
-        return {self.DBClass.__tablename__: o.to_dict()}
+        return o.to_dict()
 
     def get(self):
         o = DBSession.query(self.DBClass).filter_by(id=self.request.matchdict['id']).first()
