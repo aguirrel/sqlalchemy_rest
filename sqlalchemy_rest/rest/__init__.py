@@ -4,17 +4,18 @@ import re
 from sqlalchemy import and_, String
 
 import gc
+
+
 def find_subclasses(cls):
     all_refs = gc.get_referrers(cls)
     results = []
     for obj in all_refs:
         # __mro__ attributes are tuples
         # and if a tuple is found here, the given class is one of its members
-        if (isinstance(obj, tuple) and
-            # check if the found tuple is the __mro__ attribute of a class
-            getattr(obj[0], "__mro__", None) is obj):
+        if isinstance(obj, tuple) and getattr(obj[0], "__mro__", None) is obj:
             results.append(obj[0])
     return results
+
 
 class AlchemyBaseRest(object):
     DBClass = None
@@ -30,12 +31,22 @@ class AlchemyBaseRest(object):
         self.request = request
 
     def collection_get(self):
-        
+        count = 10
+        page = 1
+
         db_query = DBSession.query(self.DBClass)
         if 'filter' in self.request.params:
             db_query = db_query.filter(self.filter(self.request.params['filter']))
-        db_query = db_query.order_by(self.order()).all()
-        
+        if 'count' in self.request.params:
+            count = int(self.request.params['count'])
+            count = count if count <= 20 else 20
+        if 'page' in self.request.params:
+            page = int(self.request.params['page'])
+
+        db_objects = db_query.order_by(self.order()). \
+            limit(count).offset((page - 1) * count). \
+            all()
+
         objects = []
         for o in db_objects:
             o._json_eager_load = self.collection_get_eager_load
@@ -66,7 +77,7 @@ class AlchemyBaseRest(object):
     def get(self):
         o = DBSession.query(self.DBClass).filter_by(id=self.request.matchdict['id']).first()
         return o.to_dict()
-        #return {self.DBClass.__tablename__: object.to_dict()}
+        # return {self.DBClass.__tablename__: object.to_dict()}
 
     def post(self):
         o = self.DBClass()
