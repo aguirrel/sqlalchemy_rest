@@ -30,13 +30,12 @@ class AlchemyBaseRest(object):
         self.request = request
 
     def collection_get(self):
-        """Returns a list of all object."""
+        
+        db_query = DBSession.query(self.DBClass)
         if 'filter' in self.request.params:
-            db_objects = DBSession.query(self.DBClass). \
-                filter(self.filter(self.request.params['filter'])). \
-                order_by(self.order()).all()
-        else:
-            db_objects = DBSession.query(self.DBClass).order_by(self.order()).all()
+            db_query = db_query.filter(self.filter(self.request.params['filter']))
+        db_query = db_query.order_by(self.order()).all()
+        
         objects = []
         for o in db_objects:
             o._json_eager_load = self.collection_get_eager_load
