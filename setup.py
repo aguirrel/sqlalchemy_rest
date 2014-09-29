@@ -20,9 +20,7 @@ name = 'sqlalchemy_rest'
 
 requires = [
     'setuptools'
-    , 'pyramid'
     , 'SQLAlchemy'
-    , 'zope.interface'
 ]
 
 setup(
