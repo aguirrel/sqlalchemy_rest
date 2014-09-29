@@ -20,6 +20,7 @@ def find_subclasses(cls):
 class AlchemyBaseRest(object):
     DBClass = None
     collection_get_eager_load = []
+    max_count = 20
 
     def filter(self):
         pass
@@ -39,7 +40,7 @@ class AlchemyBaseRest(object):
             db_query = db_query.filter(self.filter(self.request.params['filter']))
         if 'count' in self.request.params:
             count = int(self.request.params['count'])
-            count = count if count <= 20 else 20
+            count = count if count <= max_count else max_count
         if 'page' in self.request.params:
             page = int(self.request.params['page'])
 
