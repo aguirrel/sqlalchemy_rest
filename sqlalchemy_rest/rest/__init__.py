@@ -1,7 +1,7 @@
 from .. import Base
 from .. import DBSession
 import re
-from sqlalchemy import and_, String
+from sqlalchemy import and_, String, sql
 
 import gc
 
@@ -25,6 +25,9 @@ class AlchemyBaseRest(object):
     def filter(self):
         pass
 
+    def default_filter(self):
+        return sql.true()
+
     def order(self):
         pass
 
@@ -35,7 +38,7 @@ class AlchemyBaseRest(object):
         count = self.max_count
         page = 1
 
-        db_query = DBSession.query(self.DBClass)
+        db_query = DBSession.query(self.DBClass).filter(self.default_filter())
         if 'filter' in self.request.params:
             db_query = db_query.filter(self.filter(self.request.params['filter']))
         if 'count' in self.request.params:
