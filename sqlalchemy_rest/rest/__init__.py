@@ -32,7 +32,7 @@ class AlchemyBaseRest(object):
         self.request = request
 
     def collection_get(self):
-        count = max_count
+        count = self.max_count
         page = 1
 
         db_query = DBSession.query(self.DBClass)
