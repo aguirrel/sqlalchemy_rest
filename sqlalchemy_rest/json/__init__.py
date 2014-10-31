@@ -53,11 +53,13 @@ def to_dict(self):
 
     # grab the json_eager_load set, if it exists
     # use set for easy 'in' lookups
-    json_eager_load = set(getattr(self, '_json_eager_load', []))
+    ##json_eager_load = set(getattr(self, '_json_eager_load', []))
+    json_eager_load = set(self.__dict__.get('_json_eager_load', []))
     # now load the property if it exists
     # (does this issue too many SQL statements?)
     for prop in json_eager_load:
-        getattr(self, prop, None)
+        #getattr(self, prop, None)
+        self.__dict__.get(prop, None)
 
     # we make a copy because the dict will change if the database
     # is updated / flushed
@@ -65,9 +67,9 @@ def to_dict(self):
 
     # setup the blacklist
     # use set for easy 'in' lookups
-    blacklist = set(getattr(self, '_base_blacklist', []))
+    blacklist = set(self.__dict__.get('_base_blacklist', []))
     # extend the base blacklist with the json blacklist
-    blacklist.update(getattr(self, '_json_blacklist', []))
+    blacklist.update(self.__dict__.get('_json_blacklist', []))
 
     for key in options:
         # skip blacklisted, private and SQLAlchemy properties
@@ -75,13 +77,14 @@ def to_dict(self):
             continue
 
         # format and date/datetime/time properties to isoformat
-        obj = getattr(self, key)
+        #obj = getattr(self, key)
+        obj = self.__dict__.get(key)
         if isinstance(obj, (datetime, date, time)):
             props[key] = obj.isoformat()
             #props[key] = mktime(obj.timetuple()) * 1000
         else:
             # get the class property value
-            attr = getattr(self, key)
+            attr = obj
             # let see if we need to eagerly load it
             if key in json_eager_load:
                 # this is for SQLAlchemy foreign key fields that
