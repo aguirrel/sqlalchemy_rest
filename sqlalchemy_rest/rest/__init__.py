@@ -17,9 +17,10 @@ def find_subclasses(cls):
     return results
 
 
-class AlchemyBaseRest(object):
+class AlchemyBase(object):
     DBClass = None
-    collection_get_eager_load = []
+    DBCollectionFields = None
+    DBGetFields = None
     max_count = 20
 
     def filter(self):
@@ -38,7 +39,10 @@ class AlchemyBaseRest(object):
         count = self.max_count
         page = 1
 
-        db_query = DBSession.query(self.DBClass).filter(self.default_filter())
+        if self.DBCollectionFields:
+            db_query = DBSession.query(*self.DBCollectionFields).filter(self.default_filter())
+        else:
+            db_query = DBSession.query(self.DBClass).filter(self.default_filter())
         if 'filter' in self.request.params:
             db_query = db_query.filter(self.filter(self.request.params['filter']))
         if 'count' in self.request.params:
@@ -50,12 +54,8 @@ class AlchemyBaseRest(object):
         db_objects = db_query.order_by(self.order()). \
             limit(count).offset((page - 1) * count). \
             all()
+        return db_objects
 
-        objects = []
-        for o in db_objects:
-            o._json_eager_load = self.collection_get_eager_load
-            objects.append(o.to_dict())
-        return objects
 
     def collection_post(self):
         """Adds a new user."""
@@ -79,8 +79,11 @@ class AlchemyBaseRest(object):
         return o.to_dict()
 
     def get(self):
-        o = DBSession.query(self.DBClass).filter_by(id=self.request.matchdict['id']).first()
-        return o.to_dict()
+        if self.DBGetFields:
+            o = DBSession.query(*self.DBGetFields).filter_by(id=self.request.matchdict['id']).first()
+        else:
+            o = DBSession.query(self.DBClass).filter_by(id=self.request.matchdict['id']).first()
+        return o
         # return {self.DBClass.__tablename__: object.to_dict()}
 
     def post(self):
@@ -89,6 +92,21 @@ class AlchemyBaseRest(object):
         DBSession.merge(o)
         return self.request.json
 
+
+class AlchemyBaseRest(AlchemyBase):
+    collection_get_eager_load = []
+
+    def collection_get(self):
+        db_objects = super().collection_get()
+        objects = []
+        for o in db_objects:
+            o._json_eager_load = self.collection_get_eager_load
+            objects.append(o.to_dict())
+        return objects
+
+    def get(self):
+        o = super().get()
+        return o.to_dict()
 
 class AlchemyBaseRestTable(AlchemyBaseRest):
     def filter(self):
